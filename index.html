@@ -254,20 +254,20 @@
   <h1>Call The Winner</h1>
   <div class="sub">Predict correctly to enter the Lucky Draw<br>🏆 on <span id="drawDateLabel"></span></div>
 
-  <div class="ticket">
+  <div class="ticket" id="ticketRoot">
     <div class="meta-row">
-      <span>Match <b id="matchNo">#07</b></span>
-      <span id="matchDate"><b>15 JUL</b> · 02:00</span>
+      <span>Match <b id="matchNo">...</b></span>
+      <span id="matchDate">Loading match info...</span>
     </div>
 
     <div id="pickView">
       <div class="vs-row">
         <div class="team" data-team="A" id="teamA">
-          <div class="team-name">ARGENTINA</div>
+          <div class="team-name">...</div>
         </div>
         <div class="vs-badge">VS</div>
         <div class="team" data-team="B" id="teamB">
-          <div class="team-name">FRANCE</div>
+          <div class="team-name">...</div>
         </div>
       </div>
       <div class="draw-note">Pick the team you think will win</div>
@@ -296,34 +296,53 @@
 </div>
 
 <script>
-// ---------------- CONFIG (edit these for each match) ----------------
-const CONFIG = {
-  matchNo: "#07",
-  dateLabel: "15 JUL",
-  timeLabel: "02:00",
-  teamA: { name: "ARGENTINA" },
-  teamB: { name: "FRANCE" },
-  matchKey: "wc-2026-match-07", // unique key per match — must match the MatchKey column in your Sheet
-  drawDateLabel: "15 JUL, 11PM at Vegas Club", // when the Lucky Draw itself happens
-  apiUrl: "https://script.google.com/macros/s/AKfycbyyge7tbmgiaChgr4UvZyW47n5IO4KF_6eJ6VzuOiKju2A7TfozDy1qKf-S-3WAjSeE_A/exec" // from Apps Script > Deploy > Web app
+// ---------------- LOCAL CONFIG (this is the only thing you edit in code) ----------------
+const LOCAL_CONFIG = {
+  apiUrl: "https://script.google.com/macros/s/AKfycbyyge7tbmgiaChgr4UvZyW47n5IO4KF_6eJ6VzuOiKju2A7TfozDy1qKf-S-3WAjSeE_A/exec
+" // from Apps Script > Deploy > Web app — set once, never changes daily
 };
-// ----------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------
 
-document.getElementById('matchNo').textContent = CONFIG.matchNo;
-document.getElementById('matchDate').innerHTML = `<b>${CONFIG.dateLabel}</b> · ${CONFIG.timeLabel}`;
-document.getElementById('teamA').querySelector('.team-name').textContent = CONFIG.teamA.name;
-document.getElementById('teamB').querySelector('.team-name').textContent = CONFIG.teamB.name;
-document.getElementById('tallyLabelA').textContent = CONFIG.teamA.name;
-document.getElementById('tallyLabelB').textContent = CONFIG.teamB.name;
-document.getElementById('drawDateLabel').textContent = CONFIG.drawDateLabel;
-
-let selected = null;
+// Everything below (teams, dates, match key, draw time) loads live from your Google Sheet's
+// "MatchConfig" tab — edit that Sheet daily, no code changes needed.
+let CONFIG = null;
 const teamAEl = document.getElementById('teamA');
 const teamBEl = document.getElementById('teamB');
 const submitBtn = document.getElementById('submitBtn');
 const nicknameInput = document.getElementById('nickname');
 const idError = document.getElementById('idError');
 
+async function loadMatchConfig(){
+  try{
+    const res = await fetch(`${LOCAL_CONFIG.apiUrl}?action=getConfig`);
+    const data = await res.json();
+    CONFIG = {
+      apiUrl: LOCAL_CONFIG.apiUrl,
+      matchKey: data.matchKey,
+      matchNo: data.matchNo,
+      dateLabel: data.dateLabel,
+      timeLabel: data.timeLabel,
+      teamA: { name: data.teamAName },
+      teamB: { name: data.teamBName },
+      drawDateLabel: data.drawDateLabel
+    };
+    document.getElementById('matchNo').textContent = CONFIG.matchNo;
+    document.getElementById('matchDate').innerHTML = `<b>${CONFIG.dateLabel}</b> · ${CONFIG.timeLabel}`;
+    document.getElementById('teamA').querySelector('.team-name').textContent = CONFIG.teamA.name;
+    document.getElementById('teamB').querySelector('.team-name').textContent = CONFIG.teamB.name;
+    document.getElementById('tallyLabelA').textContent = CONFIG.teamA.name;
+    document.getElementById('tallyLabelB').textContent = CONFIG.teamB.name;
+    document.getElementById('drawDateLabel').textContent = CONFIG.drawDateLabel;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Lock In My Prediction';
+  }catch(e){
+    console.error('Failed to load match config', e);
+    document.getElementById('matchDate').textContent = 'Could not load match info — please refresh.';
+  }
+}
+loadMatchConfig();
+
+let selected = null;
 let qualifiedCache = null; // true / false / null (unknown yet)
 let checkTimer = null;
 
@@ -351,6 +370,7 @@ function setError(message){
 }
 
 function updateButtonState(){
+  if(!CONFIG) return;
   const name = nicknameInput.value.trim();
   if(name.length === 0){
     setError(null);
