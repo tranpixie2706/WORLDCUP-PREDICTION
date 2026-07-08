@@ -79,8 +79,8 @@
     transform:translateY(-50%);
     box-shadow:inset 0 0 0 1px rgba(212,175,55,0.35);
   }
-  .ticket::before{left:-13px;}
-  .ticket::after{right:-13px;}
+  .ticket::before{left:2px;}
+  .ticket::after{right:2px;}
 
   .meta-row{
     display:flex;
@@ -94,23 +94,6 @@
   }
   .meta-row b{color:var(--gold-bright); font-weight:700;}
 
-  .countdown{
-    display:flex;
-    gap:8px;
-    justify-content:center;
-    margin-bottom:22px;
-  }
-  .countdown div{
-    background:rgba(0,0,0,0.25);
-    border:1px solid rgba(212,175,55,0.25);
-    border-radius:10px;
-    padding:8px 10px;
-    min-width:56px;
-    text-align:center;
-  }
-  .countdown span{display:block; font-family:'Bebas Neue'; font-size:22px; color:var(--gold-bright); letter-spacing:1px;}
-  .countdown small{font-size:9px; color:var(--muted); letter-spacing:1px; text-transform:uppercase;}
-
   .vs-row{
     display:flex;
     align-items:stretch;
@@ -122,7 +105,7 @@
     background:rgba(0,0,0,0.2);
     border:2px solid rgba(212,175,55,0.2);
     border-radius:16px;
-    padding:20px 12px 16px;
+    padding:34px 12px;
     text-align:center;
     cursor:pointer;
     transition:transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
@@ -147,9 +130,7 @@
     padding:3px 7px;
     border-radius:20px;
   }
-  .flag{font-size:38px; display:block; margin-bottom:8px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4));}
   .team-name{font-family:'Bebas Neue'; font-size:20px; letter-spacing:1px;}
-  .team-sub{font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:2px;}
 
   .vs-badge{
     align-self:center;
@@ -264,13 +245,6 @@
   @keyframes fall{
     to{transform:translateY(110vh) rotate(360deg); opacity:0;}
   }
-
-  .edit-hint{
-    text-align:center;
-    color:rgba(238,243,238,0.3);
-    font-size:10px;
-    margin-top:22px;
-  }
 </style>
 </head>
 <body>
@@ -278,7 +252,7 @@
 <div class="wrap">
   <div class="eyebrow">Vegas Club · World Cup Festival</div>
   <h1>Call The Winner</h1>
-  <div class="sub">Predict correctly to enter the Lucky Draw 🏆 on <span id="drawDateLabel"></span></div>
+  <div class="sub">Predict correctly to enter the Lucky Draw<br>🏆 on <span id="drawDateLabel"></span></div>
 
   <div class="ticket">
     <div class="meta-row">
@@ -286,27 +260,17 @@
       <span id="matchDate"><b>15 JUL</b> · 02:00</span>
     </div>
 
-    <div class="countdown" id="countdown">
-      <div><span id="cd-h">--</span><small>Hours</small></div>
-      <div><span id="cd-m">--</span><small>Mins</small></div>
-      <div><span id="cd-s">--</span><small>Secs</small></div>
-    </div>
-
     <div id="pickView">
       <div class="vs-row">
         <div class="team" data-team="A" id="teamA">
-          <span class="flag">🇦🇷</span>
           <div class="team-name">ARGENTINA</div>
-          <div class="team-sub">Group C</div>
         </div>
         <div class="vs-badge">VS</div>
         <div class="team" data-team="B" id="teamB">
-          <span class="flag">🇫🇷</span>
           <div class="team-name">FRANCE</div>
-          <div class="team-sub">Group D</div>
         </div>
       </div>
-      <div class="draw-note">Pick the team you think will win — no draws in the knockout stage 😉</div>
+      <div class="draw-note">Pick the team you think will win</div>
 
       <input class="nickname" id="nickname" maxlength="20" placeholder="Enter your name or member ID" />
       <div class="id-error" id="idError">This ID isn't on the qualified list for this draw. Reach 500 FC points to unlock your prediction.</div>
@@ -329,7 +293,6 @@
 
   </div>
 
-  <div class="edit-hint">Match, teams &amp; kickoff time are set in the page code — edit the CONFIG block to reuse for any fixture.</div>
 </div>
 
 <script>
@@ -338,23 +301,18 @@ const CONFIG = {
   matchNo: "#07",
   dateLabel: "15 JUL",
   timeLabel: "02:00",
-  kickoffISO: "2026-07-15T02:00:00+07:00", // Asia/Ho_Chi_Minh
-  teamA: { name: "ARGENTINA", flag: "🇦🇷", group: "Group C" },
-  teamB: { name: "FRANCE", flag: "🇫🇷", group: "Group D" },
+  teamA: { name: "ARGENTINA" },
+  teamB: { name: "FRANCE" },
   matchKey: "wc-2026-match-07", // unique key per match — must match the MatchKey column in your Sheet
   drawDateLabel: "15 JUL, 11PM at Vegas Club", // when the Lucky Draw itself happens
-  apiUrl: "PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE" // from Apps Script > Deploy > Web app
+  apiUrl: "https://script.google.com/macros/s/AKfycbyyge7tbmgiaChgr4UvZyW47n5IO4KF_6eJ6VzuOiKju2A7TfozDy1qKf-S-3WAjSeE_A/exec" // from Apps Script > Deploy > Web app
 };
 // ----------------------------------------------------------------------
 
 document.getElementById('matchNo').textContent = CONFIG.matchNo;
 document.getElementById('matchDate').innerHTML = `<b>${CONFIG.dateLabel}</b> · ${CONFIG.timeLabel}`;
-document.getElementById('teamA').querySelector('.flag').textContent = CONFIG.teamA.flag;
 document.getElementById('teamA').querySelector('.team-name').textContent = CONFIG.teamA.name;
-document.getElementById('teamA').querySelector('.team-sub').textContent = CONFIG.teamA.group;
-document.getElementById('teamB').querySelector('.flag').textContent = CONFIG.teamB.flag;
 document.getElementById('teamB').querySelector('.team-name').textContent = CONFIG.teamB.name;
-document.getElementById('teamB').querySelector('.team-sub').textContent = CONFIG.teamB.group;
 document.getElementById('tallyLabelA').textContent = CONFIG.teamA.name;
 document.getElementById('tallyLabelB').textContent = CONFIG.teamB.name;
 document.getElementById('drawDateLabel').textContent = CONFIG.drawDateLabel;
@@ -430,20 +388,6 @@ teamBEl.addEventListener('click', () => {
 });
 nicknameInput.addEventListener('input', updateButtonState);
 
-// Countdown
-function tick(){
-  const now = new Date();
-  const target = new Date(CONFIG.kickoffISO);
-  let diff = Math.max(0, target - now);
-  const h = Math.floor(diff / 3600000);
-  const m = Math.floor((diff % 3600000) / 60000);
-  const s = Math.floor((diff % 60000) / 1000);
-  document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
-  document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
-  document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
-}
-tick();
-setInterval(tick, 1000);
 
 function confetti(){
   const colors = ['#d4af37','#f2cf5b','#eef3ee','#b3231c'];
@@ -501,7 +445,7 @@ submitBtn.addEventListener('click', async () => {
     }
 
     const teamData = selected === 'A' ? CONFIG.teamA : CONFIG.teamB;
-    document.getElementById('pickedTeamLabel').textContent = `${teamData.flag} ${teamData.name}`;
+    document.getElementById('pickedTeamLabel').textContent = teamData.name;
     document.getElementById('confirmNickname').textContent = name;
     document.getElementById('pickView').style.display = 'none';
     document.getElementById('confirmView').classList.add('show');
